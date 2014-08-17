@@ -22,7 +22,9 @@ var filter = function(input, iterator) {
 			result.push(input[i]);
 		}
 	}
-	return result;
+	
+	if (result.length === 0) { return null; }
+    	return result;
 };
 
 var reduce = function(input, iterator, initialValue) {
