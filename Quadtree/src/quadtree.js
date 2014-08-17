@@ -55,14 +55,51 @@ var Quadtree = function(box) {
 };
 
 Quadtree.prototype.insert = function(point) {
-
+  if (this.point === null) {
+    this.point = point;
+  } 
+  else {
+    var quadrant = this.box.findQuadrantForPoint(point);
+    if (this[quadrant] == null) {
+      this[quadrant] = new Quadtree(this.box.getQuadrant(quadrant));
+    }
+    this[quadrant].insert(point);
+  }
 };
+
+
 
 Quadtree.prototype.findPointsWithin = function(searchBox) {
-
+  var results = [];
+  if (this.point.isIn(searchBox)) {
+    results.push(this.point);
+  }
+  var quads = ["SW","SE","NW","NE"];
+  for (var i=0;i<quads.length;i++){
+    if (this[quads[i]] && this[quads[i]].box.overlaps(searchBox)) {
+      var newPoints = this[quads[i]].findPointsWithin(searchBox);
+      results = results.concat(newPoints);
+    }
+  }
+  return results;
 };
 
-Quadtree.prototype.findNearestPointTo = function(target) {
 
+
+Quadtree.prototype.findNearestPointTo = function(target) {
+  if (this.point === null) {
+    return null;
+  } 
+  var searchBox = new Box(target.x-1,target.y-1,target.x+1,target.y+1);
+  
+  while (this.findPointsWithin(searchBox)[0] == null) {
+     searchBox.expand();
+  }
+  var points = this.findPointsWithin(searchBox);
+  var distances = [];
+  for (var i=0; i<points.length;i++) {
+    distances.push(target.distanceTo(points[i]));
+  }
+  return points[distances.indexOf(Math.min.apply(null,distances))];
 };
 
