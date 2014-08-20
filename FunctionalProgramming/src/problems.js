@@ -109,7 +109,7 @@ var olderOrWithChildren = function(input) {
 // if every input element passes the test and false if at least one fails.
 var every = function(input, iterator) {
 	return reduce(input, function(partial, next){
-		return (partial && next);
+		return (partial && iterator(next));
 	}, true)
 };
 
